@@ -71,6 +71,12 @@ class RoomController extends Controller
 
         $room = Room::query()->find($payload["room_id"]);
 
+        if(!isset($room))
+            return response()->json([
+                "error" => "Room Not Found"
+            ], 404);
+
+
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = time() . "." . $file->getClientOriginalExtension();
@@ -78,6 +84,7 @@ class RoomController extends Controller
             $payload["image"] = $filename;
         }
 
+//        unset($payload["room_id"]);
         $room = $room->update($payload);
         return response()->json([
             "data" => $room
@@ -121,8 +128,16 @@ class RoomController extends Controller
         if (!isset($request->room_id))
             return response()->json(["error" => "Room ID is required"]);
 
+
+        $room = Room::query()->find($request->room_id);
+
+        if(!isset($room))
+            return response()->json([
+                "error" => "Room Not Found"
+            ], 404);
+
         try {
-            Room::query()->find($request->room_id)->delete();
+           $room->delete();
         } catch (\Exception $exception) {
             Log::error($exception->getMessage(), [$exception]);
         }
